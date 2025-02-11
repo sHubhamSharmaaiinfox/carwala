@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Motor Quotes</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Update Data</h1>
+        <form method="POST" action="../../../update">
+
+            {% csrf_token %}
+            <input hidden type="text" class="form-control" id="insurance_company" name="id" value="{{ brand.id }}" required>
+            <div class="mb-3">
+                <label for="insurance_company" class="form-label">Insurance Company</label>
+                <input type="text" class="form-control" id="insurance_company" name="insurance_company" value="{{ brand.insurance_company }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ brand.name }}">
+            </div>
+            <div class="mb-3">
+                <label for="models" class="form-label">Models</label>
+                <input type="text" class="form-control" id="models" name="models" value="{{ brand.model }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="zd" class="form-label">ZD</label>
+                <input type="number" class="form-control" id="zd" name="zd" value="{{ brand.zd }}" step="any">
+            </div>
+            <div class="mb-3">
+                <label for="con" class="form-label">CON</label>
+                <input type="number" class="form-control" id="con" name="con" value="{{ brand.con }}" step="any">
+            </div>
+            <div class="mb-3">
+                <label for="engine" class="form-label">Engine</label>
+                <input type="number" class="form-control" id="engine" name="engine" value="{{ brand.engine }}" step="any">
+            </div>
+            <div class="mb-3">
+                <label for="tyre" class="form-label">Tyre</label>
+                <input type="number" class="form-control" id="tyre" name="tyre" value="{{ brand.tyre }}" step="any">
+            </div>
+            <div class="mb-3">
+                <label for="rti" class="form-label">RTI</label>
+                <input type="number" class="form-control" id="rti" name="rti" value="{{ brand.rti }}" step="any">
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+</body>
+</html>

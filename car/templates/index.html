@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EX-Showroom Price</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+
+    #resultTableContainer {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #resultTable th,
+    #resultTable td {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    #resultTable thead th {
+        font-weight: bold;
+    }
+
+    #resultTable tbody tr:hover {
+        background-color: #f1f1f1;
+        transition: background-color 0.3s;
+    }
+
+    h3 {
+        font-family: 'Arial', sans-serif;
+        color: #343a40;
+    }
+</style>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand data" href="#" >Motor Quotes</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active  data" href="../../show-data">Data List</a>
+                    </li>
+                    <!-- Add more navigation links here if needed -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="text-center mb-4 head-text">Ex-Showroom Price</h1>
+        <div class="card p-4">
+            <!-- Form -->
+            <form id="scrapeForm">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="city_id" class="form-label select-label">Select City:</label>
+                    <select id="city_id" name="city_id" required class="form-control">
+                        <option value="244">Chandigarh</option>
+                        <option value="235">Mohali, Punjab</option>
+                    </select>
+                </div>
+                <button type="button" id="fetchBrandsBtn" class="btn btn-primary mb-3">Fetch Brands</button>
+                <div id="loader" class="text-center" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div id="brandsContainer" class="row"></div>
+                <div class="btn-center">
+                    <button type="submit" class="btn btn-success">Fetch Models</button>
+                <button type="button" id="openFormBtn" class="btn btn-success">Open Insurance Details Form</button>
+                </div>
+            </form>
+        </div>
+
+
+
+
+        <!-- <button type="button" id="openFormBtn" class="btn btn-secondary mt-3">Open Insurance Details Form</button> -->
+
+        <!-- Additional Form (Initially Hidden) -->
+        <div id="additionalForm" class="card p-4 mt-4" style="display: none;">
+            <h2 class="text-center mb-4">Insurance Details</h2>
+            <form id="insuranceForm">
+                <div class="mb-3">
+                    <label for="insuranceCompany" class="form-label">Insurance Company:</label>
+                    <select id="insuranceCompany" name="insurance_company" required class="form-control">
+                        <option value="TATA AIG">TATA AIG</option>
+                        <option value="ICICI">ICICI</option>
+                        <option value="HDFC">HDFC</option>
+                        <option value="LIBERTY">LIBERTY</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="year" class="form-label">Year:</label>
+                    <input type="text" id="yearPicker" class="form-control">
+                </div>
+
+                <script>
+                    $(function () {
+                        $("#yearPicker").datepicker({
+                            changeYear: true,
+                            showButtonPanel: true,
+                            dateFormat: 'yy',
+                            yearRange: "1900:2099",
+                            onClose: function (dateText, inst) {
+                                $(this).datepicker('setDate', new Date(dateText, 1));
+                            }
+                        });
+                    });
+                </script>
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Brand Name:</label>
+                    <input type="text" id="name" name="name" required class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="models" class="form-label">Models Name:</label>
+                    <input type="text" id="models" name="models" required class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="zd" class="form-label">Zero Depreciation (ZD)%:</label>
+                    <input type="number" step="0.0001" id="zd" name="zd" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="con" class="form-label">Consumables (Con)%:</label>
+                    <input type="number" step="0.0001" id="con" name="con" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="engine" class="form-label">Engine Cover%:</label>
+                    <input type="number" step="0.0001" id="engine" name="engine" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="tyre" class="form-label">Tyre Cover%:</label>
+                    <input type="number" step="0.0001" id="tyre" name="tyre" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="rti" class="form-label">Return to Invoice (RTI)%:</label>
+                    <input type="number" step="0.0001" id="rti" name="rti" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Insurance Details</button>
+            </form>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+        <div id="results" class="mt-4" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Fetched Data</h2>
+
+                <button id="downloadButton" class="btn btn-outline-primary" style="display: none;">Download CSV</button>
+
+            </div>
+            <div class="table-responsive mt-3">
+                <input type="text" id="tableSearch" class="form-control mb-2" placeholder="Search in table...">
+                <table id="dataPreview" class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th onclick="sortTable(0)">Brand Name</th>
+                            <th onclick="sortTable(1)">Model Name</th>
+                            <th onclick="sortTable(2)">Variant Name</th>
+                            <th onclick="sortTable(2)">Ex-Showroom Price</th>
+                            <th onclick="sortTable(2)">Engine CC</th>
+                            <th onclick="sortTable(2)">On-Road Price</th>
+                            <th onclick="sortTable(3)">Transmission Type</th>
+                            <th onclick="sortTable(4)">Fuel Type</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Modal -->
+        <!-- Modal -->
+        <!-- <div id="resultTableContainer" class="container mt-4">
+            <h3 class="text-center mb-3">Processed Data</h3>
+            <div class="table-responsive">
+                <table id="resultTable2">
+                    <thead>
+                        <tr>
+                            <th>IDV</th>
+                            <th>Rate</th>
+                            <th>OD Premium</th>
+                            <th>NCB Rate</th>
+                            <th>NCB</th>
+                            <th>After NCB</th>
+                            <th>Discount Rate</th>
+                            <th>Discount Amount</th>
+                            <th>Premium Amount</th>
+                            <th>Third Party</th>
+                            <th>Driver Cover</th>
+                            <th>Paid Driver Cover</th>
+                            <th>Paid Passenger Cover</th>
+                            <th>Bumper</th>
+                            <th>Consumables</th>
+                            <th>Engine Cover</th>
+                            <th>Tyre Cover</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                
+                
+            </div>
+        </div>
+         -->
+        <div class="modal fade" id="rowDataModal" tabindex="-1" aria-labelledby="rowDataModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rowDataModalLabel">Enter Additional Information</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="rowDataForm">
+                            <div class="mb-3">
+                                <label for="manufactureYear" class="form-label">Manufacture Year</label>
+                                <input type="number" id="manufactureYear" name="manufactureYear" class="form-control"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="ncbRate" class="form-label">NCB Rate (%)</label>
+                                <input type="number" step="0.01" id="ncbRate" name="ncbRate" class="form-control"
+                                    required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="tatadiscountRate" class="form-label">Tata Discount Rate (%)</label>
+                                <input type="number" step="0.01" id="tatadiscountRate" name="tatadiscountRate"
+                                    class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="icicidiscountRate" class="form-label">Icici Discount Rate (%)</label>
+                                <input type="number" step="0.01" id="icicidiscountRate" name="icicidiscountRate"
+                                    class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="libertydiscountRate" class="form-label">Liberty Discount Rate (%)</label>
+                                <input type="number" step="0.01" id="libertydiscountRate" name="libertydiscountRate"
+                                    class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hdfcdiscountRate" class="form-label">HDFC Discount Rate (%)</label>
+                                <input type="number" step="0.01" id="hdfcdiscountRate" name="hdfcdiscountRate"
+                                    class="form-control" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="submitRowDataBtn">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="resultTableContainer"></div>
+
+        <!-- Add this button somewhere in your HTML -->
+      <div class="update">
+        <button id="updateTableDataBtn">Update Table Data</button>
+      </div>
+
+        <div id="resultTableContainerupdate" class="container mt-4"></div>
+
+
+
+
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+
+
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+
+        const csrftoken = getCSRFToken();
+
+
+        async function fetchBrands() {
+            const loader = document.getElementById('loader');
+            loader.style.display = 'block';
+            try {
+                const response = await fetch('/fetch_brands', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    }
+                });
+                const data = await response.json();
+                loader.style.display = 'none';
+
+                if (data.success) {
+                    const brandsContainer = document.getElementById('brandsContainer');
+                    brandsContainer.innerHTML = '';
+                    const columns = [[], [], [], []]; // Divide brands into two columns
+                    data.brands.forEach((brand, index) => {
+                        columns[index % 4].push(`
+                            <div class="brand-item" onclick="toggleBrand('${brand}')">
+                                <input type="checkbox" name="brands" value="${brand}" id="${brand}" class="brand-checkbox" style="display: none;">
+                                <span id="label-${brand}" class="brand-label">${brand}</span>
+                            </div>
+                        `);
+                    });
+
+                    // Create two columns
+                    columns.forEach(col => {
+                        const colDiv = document.createElement('div');
+                        colDiv.className = 'col-md-3 div-set';
+                        colDiv.innerHTML = col.join('');
+                        brandsContainer.appendChild(colDiv);
+                    });
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                loader.style.display = 'none';
+                alert('Error fetching brands.');
+            }
+        }
+
+        // Function to toggle the active state of the brand
+        function toggleBrand(brand) {
+            const checkbox = document.getElementById(brand);
+            const label = document.getElementById(`label-${brand}`);
+
+            // Toggle checkbox state
+            checkbox.checked = !checkbox.checked;
+
+            // Toggle visual active state
+            label.classList.toggle('active');
+        }
+
+
+        document.getElementById('fetchBrandsBtn').addEventListener('click', fetchBrands);
+
+        document.getElementById('scrapeForm').onsubmit = async function (event) {
+            event.preventDefault();
+            const loader = document.getElementById('loader');
+            loader.style.display = 'block';
+
+            const cityId = document.getElementById('city_id').value;
+            const selectedBrands = Array.from(document.querySelectorAll('input[name="brands"]:checked')).map(cb => cb.value);
+
+            try {
+                const response = await fetch('/fetch_models', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ city_id: cityId, brands: selectedBrands })
+                });
+                const result = await response.json();
+                loader.style.display = 'none';
+
+                if (result.success) {
+                    // Populate the table
+                    const tableBody = document.getElementById('dataPreview').querySelector('tbody');
+                    tableBody.innerHTML = '';
+                    result.data.forEach(row => {
+                        tableBody.innerHTML += `
+                            <tr>
+                                <td>
+                                    <button 
+                                        class="btn btn-link brand-button" 
+                                        onclick='handleBrandClick(${JSON.stringify(row)})'>
+                                        ${row['Brand Name']}
+                                    </button>
+                                </td>
+                                <td>${row['Model Name']}</td>
+                                <td>${row['Variant Name']}</td>
+                                <td> Rs. ${row['Ex-Showroom Price'] || 'N/A'}</td>
+                                <td> ${row['cc'] || 'N/A'}</td>
+                                <td>${row['On-Road Price'] || 'N/A'}</td>
+                                <td>${row['Transmission Type'] || 'N/A'}</td>
+                                <td>${row['Fuel Type'] || 'N/A'}</td>
+                                
+                            </tr>`;
+                    });
+
+                    // Show results section
+                    document.getElementById('results').style.display = 'block';
+
+                    // Update download button
+                    const downloadButton = document.getElementById('downloadButton');
+                    downloadButton.style.display = 'block';
+
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                loader.style.display = 'none';
+                alert('Error fetching models.');
+            }
+        };
+
+        // Search functionality
+        document.getElementById('tableSearch').addEventListener('input', function () {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#dataPreview tbody tr');
+            rows.forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+            });
+        });
+
+        // Sort table
+        function sortTable(columnIndex) {
+            const table = document.getElementById('dataPreview');
+            const rows = Array.from(table.rows).slice(1);
+            const sortedRows = rows.sort((a, b) => a.cells[columnIndex].textContent.localeCompare(b.cells[columnIndex].textContent));
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';
+            sortedRows.forEach(row => tbody.appendChild(row));
+
+
+
+        }
+        // Generate CSV from table data
+        function downloadCSV() {
+            const table = document.getElementById('dataPreview');
+            const rows = Array.from(table.rows);
+            const csvContent = rows.map(row => {
+                const cells = Array.from(row.cells);
+                return cells.map(cell => cell.textContent.trim()).join(',');
+            }).join('\n');
+
+            // Create a Blob with the CSV content
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+            // Create a download link
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'carwale_data.csv';
+            link.style.display = 'none';
+
+            // Append the link to the document and click it programmatically
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Update the download button to use the new function
+        document.getElementById('downloadButton').addEventListener('click', downloadCSV);
+    </script>
+    <script>
+
+        var rowDataModal = new bootstrap.Modal(document.getElementById('rowDataModal'));
+        function handleBrandClick(rowData) {
+            console.log("Selected Row Data:", rowData); // Debug: Check the data being captured
+            selectedRowData = rowData;
+
+            rowDataModal.show();
+        }
+
+        document.getElementById('rowDataModal').addEventListener('hidden.bs.modal', () => {
+            const rowDataForm = document.getElementById('rowDataForm').closest('.modal-body');
+            if (rowDataForm) {
+                rowDataForm.style.display = 'block'; // Reset visibility
+                // rowDataForm.reset(); // Clear form fields
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Event listener for the "Submit Row Data" button (original functionality)
+            document.getElementById('submitRowDataBtn').addEventListener('click', () => {
+                const manufactureYear = document.getElementById('manufactureYear').value;
+                const ncbRate = document.getElementById('ncbRate').value;
+                const discountRatetata = document.getElementById('tatadiscountRate').value;
+                const discountRateicici = document.getElementById('icicidiscountRate').value;
+                const discountRateliberty = document.getElementById('libertydiscountRate').value;
+                const discountRatehdfc = document.getElementById('hdfcdiscountRate').value;
+                if (!manufactureYear || !ncbRate || !discountRatetata || !discountRateicici || !discountRateliberty || !discountRatehdfc) {
+                    alert('Please fill in all fields.');
+                    return;
+                }
+
+                if (!selectedRowData) {
+                    alert('No row selected. Please select a row first.');
+                    return;
+                }
+
+                rowDataModal.hide();
+
+                const requestData = {
+                    ...selectedRowData,
+                    manufactureYear,
+                    ncbRate,
+                    discountRatetata,
+                    discountRateicici,
+                    discountRateliberty,
+                    discountRatehdfc,
+                };
+
+                fetch('/process_row_and_form_data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' , 'X-CSRFToken': csrftoken},
+                    body: JSON.stringify(requestData),
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then((result) => {
+                        console.log('Response:', result);
+                        if (Array.isArray(result.data) && result.data.every((row) => Array.isArray(row))) {
+                            displayResultInTable(result.data);
+                            scrollToTable(); // Scroll to the table
+                        } else {
+                            console.error('Unexpected response format:', result);
+                            alert('Unexpected response format. Check the console for details.');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error submitting data:', error);
+                        alert('Error processing data. Please try again.');
+                        rowDataForm.style.display = 'block';
+                    });
+            });
+
+            // Function to display nested data as a table
+            function displayResultInTable(data) {
+                const tableContainer = document.getElementById('resultTableContainer');
+                if (!tableContainer) {
+                    console.error('Element with ID "resultTableContainer" not found.');
+                    alert('Unable to display results. Please ensure the table container exists.');
+                    return;
+                }
+
+                tableContainer.innerHTML = '';
+
+                const table = document.createElement('table');
+                table.border = 1;
+                table.style.borderCollapse = 'collapse';
+                table.style.width = '100%';
+
+                data.forEach((row, rowIndex) => {
+                    const tr = document.createElement('tr');
+                    row.forEach((cell, cellIndex) => {
+                        const cellElement = document.createElement(rowIndex === 0 ? 'th' : 'td');
+                        cellElement.contentEditable = true;  // Make the cell editable
+                        cellElement.dataset.rowIndex = rowIndex; // Store row index
+                        cellElement.dataset.cellIndex = cellIndex; // Store cell index
+                        if (Array.isArray(cell)) {
+                            const nestedTable = createNestedTable(cell);
+                            cellElement.appendChild(nestedTable);
+                        } else {
+                            cellElement.innerText = cell;
+                        }
+                        tr.appendChild(cellElement);
+                    });
+
+                    // Add a "Delete" button to the row
+                    const deleteCell = document.createElement('td');
+                    const deleteButton = document.createElement('button');
+                    deleteButton.innerText = 'Delete';
+                    deleteButton.classList.add('delete-button');
+                    deleteButton.dataset.rowIndex = rowIndex;
+                    deleteButton.addEventListener('click', removeRow);
+                    deleteCell.appendChild(deleteButton);
+                    tr.appendChild(deleteCell);
+
+                    table.appendChild(tr);
+                });
+
+                tableContainer.appendChild(table);
+            }
+
+            // Function to create a nested table for array elements
+            function createNestedTable(nestedData) {
+                if (!Array.isArray(nestedData)) {
+                    const singleCell = document.createElement('td');
+                    singleCell.innerText = String(nestedData);
+                    return singleCell;
+                }
+
+                const nestedTable = document.createElement('table');
+                nestedTable.style.border = '2px solid black';
+                nestedTable.style.borderCollapse = 'collapse';
+                nestedTable.style.margin = '5px';
+
+                nestedData.forEach((nestedRow, rowIndex) => {
+                    const tr = document.createElement('tr');
+                    if (Array.isArray(nestedRow)) {
+                        nestedRow.forEach((nestedCell) => {
+                            const cellElement = document.createElement(rowIndex === 0 ? 'th' : 'td');
+                            cellElement.style.border = '1px solid black';
+                            cellElement.style.padding = '5px';
+                            cellElement.contentEditable = true;  // Make nested cell editable
+                            cellElement.innerText = nestedCell;
+                            tr.appendChild(cellElement);
+                        });
+                    } else {
+                        const cellElement = document.createElement('td');
+                        cellElement.style.border = '1px solid black';
+                        cellElement.style.padding = '5px';
+                        cellElement.contentEditable = true;  // Make nested cell editable
+                        cellElement.innerText = String(nestedRow);
+                        tr.appendChild(cellElement);
+                    }
+                    nestedTable.appendChild(tr);
+                });
+
+                return nestedTable;
+            }
+
+            // Function to scroll to the table container
+            function scrollToTable() {
+                const tableContainer = document.getElementById('resultTableContainer');
+                if (tableContainer) {
+                    tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            // Function to remove a row
+            function removeRow(event) {
+                const row = event.target.closest('tr'); // Find the closest row to the clicked delete button
+                if (row) {
+                    row.remove();  // Remove the row from the table
+                }
+            }
+
+            // Function to gather updated data from the table
+            function getUpdatedTableData() {
+                const table = document.getElementById('resultTableContainer').querySelector('table');
+                const updatedData = [];
+
+                if (table) {
+                    const rows = table.querySelectorAll('tr');
+                    rows.forEach((row, rowIndex) => {
+                        const rowData = [];
+                        const cells = row.querySelectorAll('th, td');
+                        cells.forEach((cell, cellIndex) => {
+                            if (cell.contentEditable === 'true') {
+                                const updatedValue = cell.innerText.trim();
+                                rowData.push(updatedValue);
+                            }
+                        });
+                        updatedData.push(rowData);
+                    });
+                }
+
+                return updatedData;
+            }
+
+            // Function to send the updated data to the backend
+            function sendUpdatedData() {
+                const updatedData = getUpdatedTableData();
+                if (updatedData.length > 0) {
+                    fetch('/update_table_data', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken},
+                        body: JSON.stringify({ updatedData }),
+                    })
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then((result) => {
+                            console.log('Response:', result.data);
+                            if (Array.isArray(result.data) && result.data.every((row) => Array.isArray(row))) {
+                                displayResultInTable(result.data);
+                                scrollToTable(); // Scroll to the table
+                            } else {
+                                console.error('Unexpected response format:', result);
+                                alert('Unexpected response format. Check the console for details.');
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error submitting data:', error);
+                            alert('Error processing data. Please try again.');
+                            rowDataForm.style.display = 'block';
+                        });
+
+                } else {
+                    alert('No data to update.');
+                }
+            }
+
+
+            function displayResultInTableupdate(data) {
+                const tableContainer = document.getElementById('resultTableContainerupdate');
+                if (!tableContainer) {
+                    console.error('Element with ID "resultTableContainer" not found.');
+                    alert('Unable to display results. Please ensure the table container exists.');
+                    return;
+                }
+
+                // Clear any existing content
+                tableContainer.innerHTML = '';
+
+                // Create a new table element
+                const table = document.createElement('table');
+                table.border = 1;
+                table.style.borderCollapse = 'collapse';
+                table.style.width = '100%';
+
+                // Add the headers (first row of your data)
+                const headerRow = document.createElement('tr');
+                const headers = data[0]; // The first array is the header
+                headers.forEach((header) => {
+                    const th = document.createElement('th');
+                    th.innerText = header;
+                    headerRow.appendChild(th);
+                });
+                table.appendChild(headerRow);
+
+                // Add the data rows (from the second array onward)
+                for (let i = 1; i < data.length; i++) {
+                    const tr = document.createElement('tr');
+                    data[i].forEach((cell) => {
+                        const td = document.createElement('td');
+                        td.innerText = cell;
+                        tr.appendChild(td);
+                    });
+                    table.appendChild(tr);
+                }
+
+                // Append the table to the container
+                tableContainer.appendChild(table);
+            }
+
+            // Attach sendUpdatedData to the "Update Table Data" button
+            document.getElementById('updateTableDataBtn').addEventListener('click', sendUpdatedData);
+        });
+
+
+
+    </script>
+
+    <script>
+        // Toggle Additional Form Visibility
+        document.getElementById('openFormBtn').addEventListener('click', function () {
+            const additionalForm = document.getElementById('additionalForm');
+            additionalForm.style.display = additionalForm.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Handle the form submission to send data to the backend
+        document.getElementById('insuranceForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Collect form data
+            const formData = new FormData(this);
+            console.log('Form Data:', formData);
+            const year = document.getElementById('yearPicker').value;
+            console.log('Year:', year);
+            if (year) {
+                formData.append('year', parseInt(year)); 
+            }
+            console.log('Form Data:', formData);
+
+            fetch('/api/insurance', {
+                method: 'POST',
+                headers: {  'X-CSRFToken': csrftoken},
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Insurance details saved successfully!');
+                        // Optionally, reset the form or hide it
+                        document.getElementById('insuranceForm').reset();
+                        document.getElementById('additionalForm').style.display = 'none';
+                    } else {
+                        alert('Failed to save insurance details.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('There was an error saving the insurance details.');
+                });
+        });
+    </script>
+
+</body>
+
+</html>
