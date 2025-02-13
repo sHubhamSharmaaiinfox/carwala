@@ -5,12 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Motor Quotes</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+<style>
+    .main-list h1 {
+    font-family: poppins;
+    font-weight: 600;
+}
+.serch-main {
+    font-size: 16px;
+    font-family: poppins;
+    background-color: #5D70D6;
+    border: 1px solid #5D70D6;
+}
+.serch-main:hover{
+    background-color:transparent;
+    border: 1px solid #5D70D6;
+    color: #5D70D6;
+}
+p{
+    font-family: poppins;
+}
+h1{
+    font-family: poppins;
+}
+h2{
+    font-family: poppins;
+}
+a{
+    font-family: poppins;
+}
+table{
+    font-family: poppins;
+}
+.main-list {
+    width: 95%;
+}
+table#brandTable {
+    border: 1px solid #d3cdcd;
+}
+@media(max-width:768px){
+    
+    .result-main {
+        overflow: scroll !important;
+    }
+    .serch-main{
+        margin-top: 10px;
+    }
+}
+@media(max-width:1177px){
+    .pagination {
+        overflow: scroll;
+    }
+   
+}
+@media(max-width:980px){
+    button.btn.btn-danger.btn-sm {
+    margin-top: 5px;
+}
+}
+.car-logo{
+    width:20%;
+    margin-right: 20px;
+}
+.main-list h1 {
+    font-family: poppins;
+    font-weight: 600;
+    color: #5d70d6;
+}
+</style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!-- <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="../../">Motor Quotes</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <a class="navbar-brand" href="../../">
+                <img src="../static/images/car-logo.png" alt="">
+            </a>
+            <button class="navbar" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -21,10 +93,22 @@
                 </ul>
             </div>
         </div>
+    </nav> -->
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid top-head">
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav d-flex align-items-center">
+                            <img src="../static/images/car-logo.png" alt="" class="car-logo">
+                        <a class="nav-link active  data nav-icon" href="../../">Home</a>
+                    <!-- Add more navigation links here if needed -->
+                </div>
+            </div>
+        </div>
     </nav>
 
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">List</h1>
+    <div class="container-fluid mt-5 main-list">
+        <h1 class="text-center mb-4"> Data List</h1>
 
         <form method="GET" action="../../../" class="mb-4">
             <div class="row">
@@ -32,7 +116,7 @@
                     <input type="text" name="search" class="form-control" placeholder="Search by name or insurance company" value="{{ request.GET.search }}">
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                    <button type="submit" class="btn btn-primary w-100 serch-main">Search</button>
                 </div>
             </div>
         </form>
@@ -46,6 +130,7 @@
             {% endfor %}
         {% endif %}
 
+       <div class="result-main">
         <table class="table table-striped" id="brandTable">
             <thead>
                 <tr>
@@ -85,37 +170,40 @@
                 {% endfor %}
             </tbody>
         </table>
+       </div>
 
         <!-- Pagination -->
-        <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-center">
-                {% if brands.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ request.GET.search }}">Previous</a>
-                    </li>
-                {% else %}
-                    <li class="page-item disabled">
-                        <span class="page-link">Previous</span>
-                    </li>
-                {% endif %}
-
-                {% for page_num in brands.paginator.page_range %}
-                    <li class="page-item {% if page_num == page_obj.number %}active{% endif %}">
-                        <a class="page-link" href="?page={{ page_num }}&search={{ request.GET.search }}">{{ page_num }}</a>
-                    </li>
-                {% endfor %}
-
-                {% if brands.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ request.GET.search }}">Next</a>
-                    </li>
-                {% else %}
-                    <li class="page-item disabled">
-                        <span class="page-link">Next</span>
-                    </li>
-                {% endif %}
-            </ul>
-        </nav>
+        <div class="pagination">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {% if brands.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ request.GET.search }}">Previous</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Previous</span>
+                        </li>
+                    {% endif %}
+    
+                    {% for page_num in brands.paginator.page_range %}
+                        <li class="page-item {% if page_num == page_obj.number %}active{% endif %}">
+                            <a class="page-link" href="?page={{ page_num }}&search={{ request.GET.search }}">{{ page_num }}</a>
+                        </li>
+                    {% endfor %}
+    
+                    {% if brands.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ request.GET.search }}">Next</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Next</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
 
     </div>
     

@@ -29,10 +29,12 @@
     #resultTable td {
         text-align: center;
         vertical-align: middle;
+        font-family: poppins;
     }
 
     #resultTable thead th {
         font-weight: bold;
+        font-family: poppins;
     }
 
     #resultTable tbody tr:hover {
@@ -40,27 +42,34 @@
         transition: background-color 0.3s;
     }
 
-    h3 {
-        font-family: 'Arial', sans-serif;
-        color: #343a40;
+    .select-label {
+        font-family: poppins;
+        font-weight: 500;
+    }
+
+    #loader {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+        /* Ensures it stays on top */
+    }
+    .car-logo{
+        width: 25%;
+        margin-right: 25px;
     }
 </style>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-            <a class="navbar-brand data" href="#" >Motor Quotes</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <div class="container-fluid top-head">
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
+                <div class="navbar-nav d-flex align-items-center">
+                            <img src="../static/images/car-logo.png" alt="" class="car-logo">
                         <a class="nav-link active  data" href="../../show-data">Data List</a>
-                    </li>
                     <!-- Add more navigation links here if needed -->
-                </ul>
+                </div>
             </div>
         </div>
     </nav>
@@ -79,20 +88,26 @@
                     </select>
                 </div>
                 <button type="button" id="fetchBrandsBtn" class="btn btn-primary mb-3">Fetch Brands</button>
+            
                 <div id="loader" class="text-center" style="display: none;">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
-                <div id="brandsContainer" class="row"></div>
-                <div class="btn-center">
+            
+                <div id="main-brand" style="display: none;">
+                    <div id="brandsContainer" class="row" style="display: none;"></div>
+                </div>
+            
+                <div class="btn-center" style="display: none;">
                     <button type="submit" class="btn btn-success">Fetch Models</button>
-                <button type="button" id="openFormBtn" class="btn btn-success">Open Insurance Details Form</button>
+                    <button type="button" id="openFormBtn" class="btn btn-success">Open Insurance Details Form</button>
                 </div>
             </form>
+            
         </div>
 
-
+        
 
 
         <!-- <button type="button" id="openFormBtn" class="btn btn-secondary mt-3">Open Insurance Details Form</button> -->
@@ -180,57 +195,26 @@
             </div>
             <div class="table-responsive mt-3">
                 <input type="text" id="tableSearch" class="form-control mb-2" placeholder="Search in table...">
-                <table id="dataPreview" class="table table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th onclick="sortTable(0)">Brand Name</th>
-                            <th onclick="sortTable(1)">Model Name</th>
-                            <th onclick="sortTable(2)">Variant Name</th>
-                            <th onclick="sortTable(2)">Ex-Showroom Price</th>
-                            <th onclick="sortTable(2)">Engine CC</th>
-                            <th onclick="sortTable(2)">On-Road Price</th>
-                            <th onclick="sortTable(3)">Transmission Type</th>
-                            <th onclick="sortTable(4)">Fuel Type</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <div class="res-table">
+                    <table id="dataPreview" class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th onclick="sortTable(0)">Brand Name</th>
+                                <th onclick="sortTable(1)">Model Name</th>
+                                <th onclick="sortTable(2)">Variant Name</th>
+                                <th onclick="sortTable(2)">Ex-Showroom Price</th>
+                                <th onclick="sortTable(2)">Engine CC</th>
+                                <th onclick="sortTable(2)">On-Road Price</th>
+                                <th onclick="sortTable(3)">Transmission Type</th>
+                                <th onclick="sortTable(4)">Fuel Type</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        <!-- Modal -->
-        <!-- Modal -->
-        <!-- <div id="resultTableContainer" class="container mt-4">
-            <h3 class="text-center mb-3">Processed Data</h3>
-            <div class="table-responsive">
-                <table id="resultTable2">
-                    <thead>
-                        <tr>
-                            <th>IDV</th>
-                            <th>Rate</th>
-                            <th>OD Premium</th>
-                            <th>NCB Rate</th>
-                            <th>NCB</th>
-                            <th>After NCB</th>
-                            <th>Discount Rate</th>
-                            <th>Discount Amount</th>
-                            <th>Premium Amount</th>
-                            <th>Third Party</th>
-                            <th>Driver Cover</th>
-                            <th>Paid Driver Cover</th>
-                            <th>Paid Passenger Cover</th>
-                            <th>Bumper</th>
-                            <th>Consumables</th>
-                            <th>Engine Cover</th>
-                            <th>Tyre Cover</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                
-                
-            </div>
-        </div>
-         -->
+
         <div class="modal fade" id="rowDataModal" tabindex="-1" aria-labelledby="rowDataModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -242,34 +226,27 @@
                         <form id="rowDataForm">
                             <div class="mb-3">
                                 <label for="manufactureYear" class="form-label">Manufacture Year</label>
-                                <input type="number" id="manufactureYear" name="manufactureYear" class="form-control"
-                                    required>
+                                <input type="number" id="manufactureYear" name="manufactureYear" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label for="ncbRate" class="form-label">NCB Rate (%)</label>
-                                <input type="number" step="0.01" id="ncbRate" name="ncbRate" class="form-control"
-                                    required>
+                                <input type="number" step="0.01" id="ncbRate" name="ncbRate" class="form-control" required>
                             </div>
-
                             <div class="mb-3">
                                 <label for="tatadiscountRate" class="form-label">Tata Discount Rate (%)</label>
-                                <input type="number" step="0.01" id="tatadiscountRate" name="tatadiscountRate"
-                                    class="form-control" required>
+                                <input type="number" step="0.01" id="tatadiscountRate" name="tatadiscountRate" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label for="icicidiscountRate" class="form-label">Icici Discount Rate (%)</label>
-                                <input type="number" step="0.01" id="icicidiscountRate" name="icicidiscountRate"
-                                    class="form-control" required>
+                                <input type="number" step="0.01" id="icicidiscountRate" name="icicidiscountRate" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label for="libertydiscountRate" class="form-label">Liberty Discount Rate (%)</label>
-                                <input type="number" step="0.01" id="libertydiscountRate" name="libertydiscountRate"
-                                    class="form-control" required>
+                                <input type="number" step="0.01" id="libertydiscountRate" name="libertydiscountRate" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label for="hdfcdiscountRate" class="form-label">HDFC Discount Rate (%)</label>
-                                <input type="number" step="0.01" id="hdfcdiscountRate" name="hdfcdiscountRate"
-                                    class="form-control" required>
+                                <input type="number" step="0.01" id="hdfcdiscountRate" name="hdfcdiscountRate" class="form-control" required>
                             </div>
                         </form>
                     </div>
@@ -280,13 +257,13 @@
                 </div>
             </div>
         </div>
-        <div id="resultTableContainer"></div>
-
-        <!-- Add this button somewhere in your HTML -->
-      <div class="update">
-        <button id="updateTableDataBtn">Update Table Data</button>
-      </div>
-
+        
+        <div id="resultTableContainer" style="display: none;"></div>
+        
+        <div class="update" style="display: none;">
+            <button id="updateTableDataBtn">Update Table Data</button>
+        </div>
+        
         <div id="resultTableContainerupdate" class="container mt-4"></div>
 
 
@@ -298,71 +275,80 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
 
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
 
-        function getCSRFToken() {
-            return document.querySelector('[name=csrfmiddlewaretoken]').value;
-        }
+const csrftoken = getCSRFToken();
 
-        const csrftoken = getCSRFToken();
+async function fetchBrands() {
+    const loader = document.getElementById('loader');
+    loader.style.display = 'block';
 
+    const brandsContainer = document.getElementById('brandsContainer');
+    const btnCenter = document.querySelector('.btn-center');
+    const mainBrand = document.getElementById('main-brand');
 
-        async function fetchBrands() {
-            const loader = document.getElementById('loader');
-            loader.style.display = 'block';
-            try {
-                const response = await fetch('/fetch_brands', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken
-                    }
-                });
-                const data = await response.json();
-                loader.style.display = 'none';
-
-                if (data.success) {
-                    const brandsContainer = document.getElementById('brandsContainer');
-                    brandsContainer.innerHTML = '';
-                    const columns = [[], [], [], []]; // Divide brands into two columns
-                    data.brands.forEach((brand, index) => {
-                        columns[index % 4].push(`
-                            <div class="brand-item" onclick="toggleBrand('${brand}')">
-                                <input type="checkbox" name="brands" value="${brand}" id="${brand}" class="brand-checkbox" style="display: none;">
-                                <span id="label-${brand}" class="brand-label">${brand}</span>
-                            </div>
-                        `);
-                    });
-
-                    // Create two columns
-                    columns.forEach(col => {
-                        const colDiv = document.createElement('div');
-                        colDiv.className = 'col-md-3 div-set';
-                        colDiv.innerHTML = col.join('');
-                        brandsContainer.appendChild(colDiv);
-                    });
-                } else {
-                    alert(data.message);
-                }
-            } catch (error) {
-                loader.style.display = 'none';
-                alert('Error fetching brands.');
+    try {
+        const response = await fetch('/fetch_brands', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
             }
+        });
+        const data = await response.json();
+        loader.style.display = 'none';
+
+        if (data.success) {
+            // Show the brands container and button center
+            mainBrand.style.display = 'block';  // Make the brand section visible
+            btnCenter.style.display = 'block';  // Make the button section visible
+
+            brandsContainer.innerHTML = '';
+            const columns = [[], [], [], []]; // Divide brands into columns
+
+            // Loop through brands and distribute them into the columns
+            data.brands.forEach((brand, index) => {
+                columns[index % 4].push(`
+                    <div class="brand-item" onclick="toggleBrand('${brand}')">
+                        <input type="checkbox" name="brands" value="${brand}" id="${brand}" class="brand-checkbox" style="display: none;">
+                        <span id="label-${brand}" class="brand-label">${brand}</span>
+                    </div>
+                `);
+            });
+
+            // Create columns and append them
+            columns.forEach(col => {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'col-md-3 div-set';
+                colDiv.innerHTML = col.join('');
+                brandsContainer.appendChild(colDiv);
+            });
+        } else {
+            alert(data.message);
         }
+    } catch (error) {
+        loader.style.display = 'none';
+        alert('Error fetching brands.');
+    }
+}
 
-        // Function to toggle the active state of the brand
-        function toggleBrand(brand) {
-            const checkbox = document.getElementById(brand);
-            const label = document.getElementById(`label-${brand}`);
+// Function to toggle the active state of the brand
+function toggleBrand(brand) {
+    const checkbox = document.getElementById(brand);
+    const label = document.getElementById(`label-${brand}`);
 
-            // Toggle checkbox state
-            checkbox.checked = !checkbox.checked;
+    // Toggle checkbox state
+    checkbox.checked = !checkbox.checked;
 
-            // Toggle visual active state
-            label.classList.toggle('active');
-        }
+    // Toggle visual active state
+    label.classList.toggle('active');
+}
 
+// Event listener to trigger fetching brands
+document.getElementById('fetchBrandsBtn').addEventListener('click', fetchBrands);
 
-        document.getElementById('fetchBrandsBtn').addEventListener('click', fetchBrands);
 
         document.getElementById('scrapeForm').onsubmit = async function (event) {
             event.preventDefault();
@@ -524,7 +510,7 @@
 
                 fetch('/process_row_and_form_data', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' , 'X-CSRFToken': csrftoken},
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
                     body: JSON.stringify(requestData),
                 })
                     .then((response) => {
@@ -681,7 +667,7 @@
                 if (updatedData.length > 0) {
                     fetch('/update_table_data', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken},
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
                         body: JSON.stringify({ updatedData }),
                     })
                         .then((response) => {
@@ -779,13 +765,13 @@
             const year = document.getElementById('yearPicker').value;
             console.log('Year:', year);
             if (year) {
-                formData.append('year', parseInt(year)); 
+                formData.append('year', parseInt(year));
             }
             console.log('Form Data:', formData);
 
             fetch('/api/insurance', {
                 method: 'POST',
-                headers: {  'X-CSRFToken': csrftoken},
+                headers: { 'X-CSRFToken': csrftoken },
                 body: formData
             })
                 .then(response => response.json())
@@ -805,6 +791,21 @@
                 });
         });
     </script>
+
+
+<script>
+    document.getElementById('submitRowDataBtn').addEventListener('click', function () {
+    // You can add your form validation or data submission logic here
+
+    // Show the resultTableContainer and update div when form is submitted
+    document.getElementById('resultTableContainer').style.display = 'block';
+    document.querySelector('.update').style.display = 'block';
+});
+
+</script>
+
+
+
 
 </body>
 
